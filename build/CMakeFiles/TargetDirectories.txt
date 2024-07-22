@@ -1,0 +1,3 @@
+/home/guardiantech/FindRoute/build/CMakeFiles/findroute.dir
+/home/guardiantech/FindRoute/build/CMakeFiles/edit_cache.dir
+/home/guardiantech/FindRoute/build/CMakeFiles/rebuild_cache.dir
