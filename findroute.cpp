@@ -83,7 +83,7 @@ std::vector<Node> FindRoute::aStar(const std::vector<std::vector<int>>& grid, No
     return {}; // Return empty path if no path found
 }
 
-std::vector<Node> FindRoute::coveragePathPlanning(const std::vector<std::vector<int>>& grid) {
+std::vector<int> FindRoute::coveragePathPlanning(const std::vector<std::vector<int>>& grid) {
     std::vector<Node> allOnes;
     for (int i = 0; i < grid.size(); ++i) {
         for (int j = 0; j < grid[0].size(); ++j) {
@@ -113,10 +113,10 @@ std::vector<Node> FindRoute::coveragePathPlanning(const std::vector<std::vector<
         }
 
         if (bestPath.empty()) {
-            break; // Se não encontrar um caminho válido, interrompe
+            break;
         }
 
-        // Adiciona o caminho encontrado ao caminho total, evitando duplicatas
+        // add finded path to local path
         for (const auto& node : bestPath) {
             if (fullPath.empty() || fullPath.back() != node) {
                 fullPath.push_back(node);
@@ -127,5 +127,12 @@ std::vector<Node> FindRoute::coveragePathPlanning(const std::vector<std::vector<
         allOnes.erase(std::remove(allOnes.begin(), allOnes.end(), nextGoal), allOnes.end());
     }
 
-    return fullPath;
+    // create vector based on Node
+    std::vector<int> result;
+    for (const auto& node : fullPath) {
+        result.push_back(node.x);
+        result.push_back(node.y);
+    }
+
+    return result;
 }

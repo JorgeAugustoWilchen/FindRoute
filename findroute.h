@@ -8,6 +8,7 @@
 #include <cmath>
 #include <algorithm>
 #include <limits>
+#include <utility>
 
 struct Node {
     int x, y;
@@ -43,7 +44,7 @@ public:
     FindRoute();
     ~FindRoute();
 
-    std::vector<Node> coveragePathPlanning(const std::vector<std::vector<int>>& grid);
+    std::vector<int> coveragePathPlanning(const std::vector<std::vector<int>>& grid);
 
 private:
 
