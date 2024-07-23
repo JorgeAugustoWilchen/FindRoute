@@ -1,1 +1,1 @@
-/usr/bin/c++ CMakeFiles/findroute.dir/findroute.cpp.o -o findroute 
+/usr/bin/c++ -g CMakeFiles/findroute.dir/findroute.cpp.o -o findroute 
