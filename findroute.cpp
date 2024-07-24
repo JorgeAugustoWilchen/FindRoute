@@ -6,12 +6,10 @@ FindRoute::FindRoute()
 
 }
 
-
 FindRoute::~FindRoute() 
 {
 
 }
-
 
 float FindRoute::heuristic(int x1, int y1, int x2, int y2) {
     return std::sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
@@ -200,4 +198,18 @@ std::vector<int> FindRoute::coveragePathPlanning(const std::vector<std::vector<i
     }
 
     return route;
+}
+
+std::vector<std::pair<int, int>> FindRoute::smallPath(const std::vector<std::vector<int>>& grid, const std::pair<int, int>& start, const std::pair<int, int>& goal) {
+    Node from(start);
+    Node to(goal);
+    
+    std::vector<Node> path = aStar(grid, from, to);
+    std::vector<std::pair<int, int>> finalPath;
+    
+    for (auto& coord : path) {
+        finalPath.emplace_back(coord.x, coord.y);
+    }
+
+    return finalPath;
 }

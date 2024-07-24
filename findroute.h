@@ -49,6 +49,7 @@ public:
 
     std::vector<int> coveragePathPlanning(const std::vector<std::vector<int>>& grid);
     std::vector<int> coveragePathPlanning(const std::vector<std::vector<int>>& grid, const std::pair<int, int>& start, const std::pair<int, int>& goal);
+    std::vector<std::pair<int, int>> smallPath(const std::vector<std::vector<int>>& grid, const std::pair<int, int>& start, const std::pair<int, int>& goal);
 
 private:
 
