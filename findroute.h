@@ -18,6 +18,9 @@ struct Node {
     Node(int x, int y, float g = 0, float h = 0, Node* parent = nullptr) 
         : x(x), y(y), g(g), h(h), parent(parent) {}
 
+    Node(const std::pair<int, int>& coord, float g = 0, float h = 0, Node* parent = nullptr) 
+        : x(coord.first), y(coord.second), g(g), h(h), parent(parent) {}
+
     float getF() const { return g + h; }
     
     bool operator==(const Node& other) const {
@@ -45,6 +48,7 @@ public:
     ~FindRoute();
 
     std::vector<int> coveragePathPlanning(const std::vector<std::vector<int>>& grid);
+    std::vector<int> coveragePathPlanning(const std::vector<std::vector<int>>& grid, const std::pair<int, int>& start, const std::pair<int, int>& goal);
 
 private:
 

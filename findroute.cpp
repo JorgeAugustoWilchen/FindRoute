@@ -136,3 +136,68 @@ std::vector<int> FindRoute::coveragePathPlanning(const std::vector<std::vector<i
 
     return result;
 }
+
+std::vector<int> FindRoute::coveragePathPlanning(const std::vector<std::vector<int>>& grid, const std::pair<int, int>& start, const std::pair<int, int>& goal)
+{
+    if (grid[start.first][start.second] == 0 || grid[goal.first][goal.second] == 0) {
+        return {};
+    }
+
+    std::vector<Node> allOnes;
+    for (int i = 0; i < grid.size(); ++i) {
+        for (int j = 0; j < grid[0].size(); ++j) {
+            if(grid[i][j] == 1) {
+                allOnes.emplace_back(i, j);
+            }
+        }
+    }
+
+    std::vector<Node> fullPath;
+    Node startPoint(start);
+    Node endPoint(goal);
+    allOnes.erase(std::remove(allOnes.begin(), allOnes.end(), startPoint), allOnes.end());
+    fullPath.push_back(startPoint);
+
+    while (!allOnes.empty()) {
+        float minDistance = std::numeric_limits<float>::max();
+        Node nextGoal(0, 0);
+        std::vector<Node> bestPath;
+
+        for (auto& newGoal : allOnes) {
+            auto path = aStar(grid, startPoint, newGoal);
+            if(!path.empty() && path.back().getF() < minDistance) {
+                minDistance = path.back().getF();
+                nextGoal = newGoal;
+                bestPath = path;
+            }
+        }
+
+        if (bestPath.empty()) {
+            break;
+        }
+
+        for (const auto& node : bestPath) {
+            if(fullPath.empty() || fullPath.back() != node) {
+                fullPath.push_back(node);
+            }
+        }
+
+        startPoint = nextGoal;
+        allOnes.erase(std::remove(allOnes.begin(), allOnes.end(), nextGoal), allOnes.end());
+    }
+
+    std::vector<Node> finalPath = aStar(grid, startPoint, endPoint);
+    for (const auto& node : finalPath) {
+        if (fullPath.empty() || fullPath.back() != node) {
+            fullPath.push_back(node);
+        }
+    }
+
+    std::vector<int> route;
+    for (const auto& node : fullPath) {
+        route.push_back(node.x);
+        route.push_back(node.y);
+    }
+
+    return route;
+}

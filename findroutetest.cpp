@@ -16,7 +16,10 @@ int main() {
 
     FindRoute fr;
 
-    std::vector<int> path = fr.coveragePathPlanning(grid);
+    //std::vector<int> path = fr.coveragePathPlanning(grid);
+    std::pair<int, int> start(0, 0);
+    std::pair<int, int> goal(7, 9);
+    std::vector<int> path = fr.coveragePathPlanning(grid, start, goal);
 
     std::cout << "Path: ";
     for (size_t i = 0; i < path.size(); i += 2) {
