@@ -1,0 +1,215 @@
+#include "findroute.h"
+
+
+FindRoute::FindRoute()
+{
+
+}
+
+FindRoute::~FindRoute() 
+{
+
+}
+
+float FindRoute::heuristic(int x1, int y1, int x2, int y2) {
+    return std::sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+}
+
+std::vector<Node> FindRoute::getNeighbors(const Node& node, const std::vector<std::vector<int>>& grid) {
+    std::vector<Node> neighbors;
+    int directions[4][2] = {{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
+    
+    for (const auto& dir : directions) {
+        int newX = node.x + dir[0];
+        int newY = node.y + dir[1];
+        if (newX >= 0 && newY >= 0 && newX < grid.size() && newY < grid[0].size() && grid[newX][newY] == 1) {
+            neighbors.emplace_back(newX, newY);
+        }
+    }
+    
+    return neighbors;
+}
+
+std::vector<Node> FindRoute::reconstructPath(Node* endNode) {
+    std::vector<Node> path;
+    Node* current = endNode;
+    
+    while (current != nullptr) {
+        path.push_back(*current);
+        current = current->parent;
+    }
+    
+    std::reverse(path.begin(), path.end());
+    return path;
+}
+
+std::vector<Node> FindRoute::aStar(const std::vector<std::vector<int>>& grid, Node start, Node goal) {
+    std::priority_queue<Node> openSet;
+    std::unordered_set<Node, NodeHasher> closedSet;
+
+    start.h = heuristic(start.x, start.y, goal.x, goal.y);
+    openSet.push(start);
+
+    while (!openSet.empty()) {
+        Node current = openSet.top();
+        openSet.pop();
+
+        if (current == goal) {
+            return reconstructPath(&current);
+        }
+
+        closedSet.insert(current);
+
+        for (auto& neighbor : getNeighbors(current, grid)) {
+            if (closedSet.find(neighbor) != closedSet.end()) {
+                continue;
+            }
+
+            float tentative_g = current.g + 1; // Assuming cost of 1 for each move
+            bool inOpenSet = false;
+
+            if (tentative_g < neighbor.g || !inOpenSet) {
+                neighbor.g = tentative_g;
+                neighbor.h = heuristic(neighbor.x, neighbor.y, goal.x, goal.y);
+                neighbor.parent = new Node(current);
+
+                openSet.push(neighbor);
+            }
+        }
+    }
+
+    return {}; // Return empty path if no path found
+}
+
+std::vector<int> FindRoute::coveragePathPlanning(const std::vector<std::vector<int>>& grid) {
+    std::vector<Node> allOnes;
+    for (int i = 0; i < grid.size(); ++i) {
+        for (int j = 0; j < grid[0].size(); ++j) {
+            if (grid[i][j] == 1) {
+                allOnes.emplace_back(i, j);
+            }
+        }
+    }
+
+    std::vector<Node> fullPath;
+    Node start = allOnes[0];
+    allOnes.erase(allOnes.begin());
+    fullPath.push_back(start);
+
+    while (!allOnes.empty()) {
+        float minDistance = std::numeric_limits<float>::max();
+        Node nextGoal(0, 0);
+        std::vector<Node> bestPath;
+
+        for (auto& goal : allOnes) {
+            auto path = aStar(grid, start, goal);
+            if (!path.empty() && path.back().getF() < minDistance) {
+                minDistance = path.back().getF();
+                nextGoal = goal;
+                bestPath = path;
+            }
+        }
+
+        if (bestPath.empty()) {
+            break;
+        }
+
+        // add finded path to local path
+        for (const auto& node : bestPath) {
+            if (fullPath.empty() || fullPath.back() != node) {
+                fullPath.push_back(node);
+            }
+        }
+
+        start = nextGoal;
+        allOnes.erase(std::remove(allOnes.begin(), allOnes.end(), nextGoal), allOnes.end());
+    }
+
+    // create vector based on Node
+    std::vector<int> result;
+    for (const auto& node : fullPath) {
+        result.push_back(node.x);
+        result.push_back(node.y);
+    }
+
+    return result;
+}
+
+std::vector<int> FindRoute::coveragePathPlanning(const std::vector<std::vector<int>>& grid, const std::pair<int, int>& start, const std::pair<int, int>& goal)
+{
+    if (grid[start.first][start.second] == 0 || grid[goal.first][goal.second] == 0) {
+        return {};
+    }
+
+    std::vector<Node> allOnes;
+    for (int i = 0; i < grid.size(); ++i) {
+        for (int j = 0; j < grid[0].size(); ++j) {
+            if(grid[i][j] == 1) {
+                allOnes.emplace_back(i, j);
+            }
+        }
+    }
+
+    std::vector<Node> fullPath;
+    Node startPoint(start);
+    Node endPoint(goal);
+    allOnes.erase(std::remove(allOnes.begin(), allOnes.end(), startPoint), allOnes.end());
+    fullPath.push_back(startPoint);
+
+    while (!allOnes.empty()) {
+        float minDistance = std::numeric_limits<float>::max();
+        Node nextGoal(0, 0);
+        std::vector<Node> bestPath;
+
+        for (auto& newGoal : allOnes) {
+            auto path = aStar(grid, startPoint, newGoal);
+            if(!path.empty() && path.back().getF() < minDistance) {
+                minDistance = path.back().getF();
+                nextGoal = newGoal;
+                bestPath = path;
+            }
+        }
+
+        if (bestPath.empty()) {
+            break;
+        }
+
+        for (const auto& node : bestPath) {
+            if(fullPath.empty() || fullPath.back() != node) {
+                fullPath.push_back(node);
+            }
+        }
+
+        startPoint = nextGoal;
+        allOnes.erase(std::remove(allOnes.begin(), allOnes.end(), nextGoal), allOnes.end());
+    }
+
+    std::vector<Node> finalPath = aStar(grid, startPoint, endPoint);
+    for (const auto& node : finalPath) {
+        if (fullPath.empty() || fullPath.back() != node) {
+            fullPath.push_back(node);
+        }
+    }
+
+    std::vector<int> route;
+    for (const auto& node : fullPath) {
+        route.push_back(node.x);
+        route.push_back(node.y);
+    }
+
+    return route;
+}
+
+std::vector<std::pair<int, int>> FindRoute::smallPath(const std::vector<std::vector<int>>& grid, const std::pair<int, int>& start, const std::pair<int, int>& goal) {
+    Node from(start);
+    Node to(goal);
+    
+    std::vector<Node> path = aStar(grid, from, to);
+    std::vector<std::pair<int, int>> finalPath;
+    
+    for (auto& coord : path) {
+        finalPath.emplace_back(coord.x, coord.y);
+    }
+
+    return finalPath;
+}
